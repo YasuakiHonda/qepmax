@@ -1,5 +1,10 @@
 qepmax package
 
+Qepmax is a Qepcad B - Maxima interfacing module written in
+Maxima language and Common Lisp. As Qepcad B provides so 
+called quantifier elimination in the real domain, Qepmax
+adds this functionality to Maxima computer algebra system.
+
 Installation instructions are in the file INSTALL.
 Lincese terms can be found in each source files. 
 qepmax package is in GPL v2.
