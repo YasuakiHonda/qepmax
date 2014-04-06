@@ -1,7 +1,8 @@
 How to install
-- Download qepmax.zip from Github and save it in your home directory.
-- cd ~; zip -d qepmax.zip
-then directory ~/qepmax is created.
+- Download qepmax-master.zip from Github by clicking the button 
+"Download ZIP" and save it in your home directory.
+- cd ~; zip -d qepmax-master.zip
+then directory ~/qepmax-master is created.
 
 - Download http://www.usna.edu/CS/~qepcad/INSTALL/qepcad-B.1.69.tar.gz
 and save it in your home directory.
@@ -10,8 +11,8 @@ then directory ~/qesource is created.
 
 - add the followings in your maxima-init.mac
 
-file_search_maxima:append(["~/qepmax/###.{mac,mc}"],file_search_maxima);
-file_search_lisp:append(["~/qepmax/###.{lisp,lsp}"],file_search_lisp);
+file_search_maxima:append(["~/qepmax-master/###.{mac,mc}"],file_search_maxima);
+file_search_lisp:append(["~/qepmax-master/###.{lisp,lsp}"],file_search_lisp);
 qepcad_installed_dir:"~/qesource";
 
 
