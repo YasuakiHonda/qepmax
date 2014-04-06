@@ -1,7 +1,7 @@
 How to install
 - Download qepmax-master.zip from Github by clicking the button 
 "Download ZIP" and save it in your home directory.
-- cd ~; zip -d qepmax-master.zip
+- cd ~; unzip qepmax-master.zip
 then directory ~/qepmax-master is created.
 
 - Download http://www.usna.edu/CS/~qepcad/INSTALL/qepcad-B.1.69.tar.gz
@@ -17,7 +17,7 @@ qepcad_installed_dir:"~/qesource";
 
 
 
-- Download http://www.usna.edu/CS/~qepcad/INSTALL/saclib2.2.6.tar.gz
+- Download HTTP://WWW.USNA.EDU/CS/~QEPCAD/INSTALL/SACLIB2.2.6.TAR.GZ
 and save it in your home directory.
 - cd ~; tar xvfz saclib2.2.6.tar.gz
 then directory ~/saclib2.2.6 is created.
