@@ -1,0 +1,224 @@
+/*
+Qepmax.mac 
+Copyright (C) 2013, 2014 Yasuaki Honda
+Copyrigth (C) 2013 Reinhard Oldenburg
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+or the following URL: http://www.gnu.org/licenses/gpl-2.0.html.
+
+You can contact one of the author by email:
+Yasuaki dot Honda at Gmail dot Com
+*/
+
+/*
+
+User command: qe(QFList, exp)
+where QFList is a list of either [A,var] or [E,var], and
+exp is a logical expression with polinomials.
+[A,var] means For all var, and [E,var] means There exists var.
+The output of qe() is the logically equivarent formula to exp,
+but does not contain quantified variables (those appeared in QFList).
+
+Example:
+(%i1) qe([[E,x],[E,y]],x^2+y^2=1 %and m=x+2*y);
+(%o1) m^2-5<=0
+
+
+
+qepcad command input file format
+ [ comment ]
+ ( var1, var2, ,,, vark )
+ number
+ (Quantifier var1)(Quantifier var2)...(Q varN)[ exp op exp op ... op exp].
+ finish
+
+Internal function qepcad(): takes above (except the first one) as
+arguments and write them out into a specific file. The exp needs to be
+surrounded with [ ], so this translation is performed by calling
+the internal function writeLogicalExp().
+Then qepcad program is invoked with passing the specific file as the
+input redirection. The output is caught into another specific file as
+the output redirect.
+
+Internal function readQepcad():
+The output file is analized to find the result expression.
+The output expression format is different from the standard maxima
+syntax. The difference is that multiplication is written as a single
+white space, rather than the astarisk which is used in maxima.
+
+Internal function ?qepcadhelp():
+We lex the output expression to find such multiplication and insert
+the maxima multiplication (astarisk). With lex, we can find the pattern of
+<Number><variable> or
+<variable><variable>
+then we insert the astarisk to construct the output expression string.
+
+Finally we use Maxima's parse_string() to parse the output expression string.
+
+*/
+
+load(to_poly_solve);
+load("qepmax-support.lisp");
+
+if (not(member('qepcad_installed_dir,values))) then
+  qepcad_installed_dir:"~/qepmax/qesource";
+
+if (not(member('qepcad_input_file,values))) then
+  qepcad_input_file:sconcat(maxima_tempdir,"/qepcad_input.txt");
+
+if (not(member('qepcad_output_file,values))) then
+  qepcad_output_file:sconcat(maxima_tempdir,"/qepcad_output.txt");
+
+if (not(member('qepcad_file_pattern,values))) then
+  qepcad_file_pattern:sconcat(maxima_tempdir,"/qepcad_*.txt");
+
+debug_qepmax:false;
+infix("/=",80,80);
+infix("%implies",60,60);
+"%implies"(a,b):= %not(a) %or b;
+matchdeclare (aa, true,bb,true,cc,true,dd,true); 
+tellsimp(%not(true),false); 
+tellsimp(%not(false),true); 
+tellsimp(%not(%not(aa)),aa); 
+tellsimp(%not(aa %or bb),%not(aa) %and %not(bb)); 
+tellsimp(%not(aa %or bb %or cc),%not(aa) %and %not(bb) %and %not(cc)); 
+tellsimp(%not(aa %or bb %or cc %or dd),%not(aa) %and %not(bb) %and %not(cc) %and %not(dd)); 
+tellsimp(%not(aa %and bb),%not(aa) %or %not(bb));
+tellsimp(%not(aa %and bb %and cc),%not(aa) %or %not(bb) %or %not(cc)); 
+tellsimp(%not(aa %and bb %and cc %and dd),%not(aa) %or %not(bb) %or %not(cc) %or %not(dd)); 
+tellsimp(%not(aa %and bb %and cc %and dd %and ee),%not(aa) %or %not(bb) %or %not(cc) %or %not(dd) %or %not(ee)); 
+tellsimp(%not(aa=bb),aa#bb); 
+tellsimp(%not(aa#bb),aa=bb); 
+tellsimp(%not( aa>bb),aa<=bb); tellsimp(%not( aa<bb),aa>=bb);  
+tellsimp(%not( aa>=bb),aa<bb); tellsimp(%not( aa<=bb),aa>bb);
+
+rationalp(ex):=is(1#denom(ratsimp(ex)));
+matchdeclare(rr,rationalp);
+defrule(cl1,rr=cc,num(ratsimp(rr))=cc*denom(ratsimp(rr)) %and denom(ratsimp(rr))#0);
+defrule(cl2,cc=rr,num(ratsimp(rr))=cc*denom(ratsimp(rr)) %and denom(ratsimp(rr))#0);
+defrule(cl3,rr<cc, denom(ratsimp(rr))#0 %and 
+                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))<denom(ratsimp(rr))*cc)) %and 
+                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))>denom(ratsimp(rr))*cc)) );
+defrule(cl4,cc>rr, denom(ratsimp(rr))#0 %and 
+                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))<denom(ratsimp(rr))*cc)) %and 
+                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))>denom(ratsimp(rr))*cc)) );
+defrule(cl5,rr>cc, denom(ratsimp(rr))#0 %and 
+                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))>denom(ratsimp(rr))*cc)) %and 
+                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))<denom(ratsimp(rr))*cc)) );
+defrule(cl6,cc<rr, denom(ratsimp(rr))#0 %and 
+                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))>denom(ratsimp(rr))*cc)) %and 
+                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))<denom(ratsimp(rr))*cc)) );
+defrule(cl7,rr<=cc, denom(ratsimp(rr))#0 %and 
+                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))<=denom(ratsimp(rr))*cc)) %and 
+                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))>=denom(ratsimp(rr))*cc)) );
+defrule(cl8,cc>=rr, denom(ratsimp(rr))#0 %and 
+                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))<=denom(ratsimp(rr))*cc)) %and 
+                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))>=denom(ratsimp(rr))*cc)) );
+defrule(cl9,rr>=cc, denom(ratsimp(rr))#0 %and 
+                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))>=denom(ratsimp(rr))*cc)) %and 
+                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))<=denom(ratsimp(rr))*cc)) );
+defrule(cl10,cc<=rr, denom(ratsimp(rr))#0 %and 
+                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))>=denom(ratsimp(rr))*cc)) %and 
+                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))<=denom(ratsimp(rr))*cc)) );
+
+defrule(ratio1,aa=bb,ratsimp(aa)=ratsimp(bb));
+defrule(ratio2,aa<bb,ratsimp(aa)<ratsimp(bb));
+defrule(ratio3,aa>bb,ratsimp(aa)>ratsimp(bb));
+defrule(ratio4,aa#bb,ratsimp(aa)#ratsimp(bb));
+defrule(ratio5,aa<=bb,ratsimp(aa)<=ratsimp(bb));
+defrule(ratio6,aa>=bb,ratsimp(aa)>=ratsimp(bb));
+
+preRatio(expr):= applyb1(applyb1(expr,ratio1,ratio2,ratio3,ratio4,ratio5,ratio6),
+                cl1,cl2, cl3, cl4, cl5, cl6, cl7,cl8,cl9,cl10);
+
+qe(qs,expr):= block([newexpr:preRatio(expr)],
+                      /* print("converted to"), print(newexpr), */
+                      QCC(qs,newexpr));
+
+QCC(qs,expr):=block([vs:listofvars(expr),fv:[],i,gv:map(lambda([x],x[2]),qs)],
+  if expr=true or expr=false then return(expr),
+  for i:1 thru length(vs) do if not(member(vs[i],gv)) then fv:append(fv,[vs[i]]),
+  qepcad(append(fv,gv),length(listofvars(expr))-length(qs),qs,expr));
+
+qepcad(varlist, numfreevar, QFList, formula) := (
+    system(sconcat("rm -f ",qepcad_file_pattern)),
+    qepcad1(varlist, numfreevar, QFList, formula),
+    system(sconcat("bash -c 'export qe=",qepcad_installed_dir,"; $qe/bin/qepcad +N200000000 < ",
+        qepcad_input_file,
+        " > ",
+        qepcad_output_file, "'")),
+    readQepcad());
+    
+qepcad1(varlist, numfreevar, QFList, formula) :=
+  block([file, ost, old_display_mode:display2d,noErr:false],
+    if length(varlist)=0 then error("qepcad: varlist is a list of at least one varibles; found: ", varlist),
+    file:qepcad_input_file,
+    ost:openw(file),
+    display2d:false,
+    prepare_for_qepcad(),
+    errcatch(
+      printf(ost,"[ Generated by qepcad.mac ]~%"),
+      printf(ost,"( "),
+      for i:1 thru length(varlist) do
+        printf(ost, "~a ~a", varlist[i], if (i<length(varlist)) then "," else ""),
+      printf(ost,")~%"),
+      printf(ost,"~d~%", numfreevar),
+      for i:1 thru length(QFList) do block([QFS,QFV],[QFS,QFV]:QFList[i],
+        printf(ost,"(~a ~a)", QFS, QFV)),
+      printf(ost, "[ ~a ].~%finish~%", writeLogicalExp(formula)),
+      noErr:true
+      ),
+    restore_maxima(),
+    display2d:old_display_mode,
+    close(ost),
+    if (noErr = false) then return(false)
+    );
+
+readQepcad() :=
+  block([file:qepcad_output_file,
+         delim:"An equivalent quantifier-free",
+         end:"=====================  The End",
+         instr, err:false,
+         res:"", ist],
+     ist:openr(file),  /* print("RETURN"), print(flength(ist)), */
+     if ist="" then error("QEPCAD failed"),
+     for instr:readline(ist) next readline(ist) while (flength(ist)>0 and stringp(instr) and ssearch(delim,instr) = false) do block([],
+       /* print(["read",instr]),*/ if ssearch("Error",instr) # false or ssearch("Failure",instr) # false then (err:true, /*print("exit with FAIL"),*/ return(FAIL) ) else instr),
+       if not(err) then for instr:readline(ist) next readline(ist) 
+       while (not(err) and flength(ist)>0 and stringp(instr) and ssearch(end,instr) = false and ssearch("Error",instr) = false and ssearch("Failure",instr) = false) do
+       block([],  res:concat(res,instr), if ssearch("Error",instr) # false or ssearch("Failure",instr) # false then error("qepcad error") ),
+     close(ist),
+     if err then FAIL else (
+       /* print("EINGELESEN"), print(res),*/
+       parse_string(concat(?qepcadlex(res)," ;"))));
+
+writeLogicalExp(lexp) := block([op, res:""],
+  if atom(lexp) then return(string(lexp)),
+  op:op(lexp),
+  if op = false then return(string(lexp)),
+  if isLogicalOp(op) then block([],
+    res:"[",
+    for i:1 thru length(lexp) do block([],
+      res:sconcat(res, "[", writeLogicalExp(part(lexp,i)), "]"),
+      if (i<length(lexp)) then res:sconcat(res," ",qepLogicalSymbol(op)," ")),
+    res:sconcat(res," ]"),
+    return(res))
+  else
+   block([exp2:opsubst("/=","#",lexp)],
+      return(string(exp2)))  );
+
+isLogicalOp(op) := is(op=?%and) or is(op=?%or);
+
+qepLogicalSymbol(op) := if (op=?%and) then "/\\" else if (op=?%or) then "\\/";

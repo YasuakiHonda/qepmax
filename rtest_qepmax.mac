@@ -1,0 +1,21 @@
+load(qepmax)$
+
+qe([[A,x]],x^2>0);
+
+qe([[A,x]],x^2>=0);
+
+qe([[A,x]],x>3 %implies -2*x+5<M);
+
+qe([[E,x]],x^2<=0);
+
+qe([[E,x],[E,y]],y=3*x+1 %and y=m*x-2);
+
+qe([[A,x],[A,y]],%not(y=x^2+1 %and y=m*x));
+
+qe([[A,x],[A,y]], %not((y-2)^2+x^2=1 %and y=m*x));
+
+qe([[A,x]],3*x^2 > m*(x-1)^2+1);
+
+qe([[A,x],[A,y]],%not((y<x+1 %and y<-x+1) %and y=a*x+b));
+
+qe([[E,x],[E,y],[E,z]],x^2+y^2+z^2=6 %and x+y+z=4 %and v=x*y*z);
