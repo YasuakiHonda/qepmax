@@ -84,6 +84,9 @@ if (not(member('qepcad_output_file,values))) then
 if (not(member('qepcad_file_pattern,values))) then
   qepcad_file_pattern:sconcat(maxima_tempdir,"/qepcad_*.txt");
 
+if (not(member('qepcad_option_N,values))) then
+  qepcad_option_N:" +N20000000 ";
+
 debug_qepmax:false;
 infix("/=",80,80);
 infix("%implies",60,60);
@@ -155,7 +158,7 @@ QCC(qs,expr):=block([vs:listofvars(expr),fv:[],i,gv:map(lambda([x],x[2]),qs)],
 qepcad(varlist, numfreevar, QFList, formula) := (
     system(sconcat("rm -f ",qepcad_file_pattern)),
     qepcad1(varlist, numfreevar, QFList, formula),
-    system(sconcat("bash -c 'export qe=",qepcad_installed_dir,"; $qe/bin/qepcad +N200000000 < ",
+    system(sconcat("bash -c 'export qe=",qepcad_installed_dir,"; $qe/bin/qepcad ",qepcad_option_N," < ",
         qepcad_input_file,
         " > ",
         qepcad_output_file, "'")),
