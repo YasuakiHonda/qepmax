@@ -87,6 +87,9 @@ if (not(member('qepcad_file_pattern,values))) then
 if (not(member('qepcad_option_N,values))) then
   qepcad_option_N:" +N20000000 ";
 
+if (not(member('qepcad_on_moa,values))) then
+  qepcad_on_moa:false;
+
 debug_qepmax:false;
 infix("/=",80,80);
 infix("%implies",60,60);
@@ -153,7 +156,10 @@ qe(qs,expr):= block([newexpr:preRatio(expr)],
 QCC(qs,expr):=block([vs:listofvars(expr),fv:[],i,gv:map(lambda([x],x[2]),qs)],
   if expr=true or expr=false then return(expr),
   for i:1 thru length(vs) do if not(member(vs[i],gv)) then fv:append(fv,[vs[i]]),
-  qepcad(append(fv,gv),length(listofvars(expr))-length(qs),qs,expr));
+  if qepcad_on_moa then
+    qepcad1(append(fv,gv),length(listofvars(expr))-length(qs),qs,expr)
+  else
+    qepcad(append(fv,gv),length(listofvars(expr))-length(qs),qs,expr));
 
 qepcad(varlist, numfreevar, QFList, formula) := (
     system(sconcat("rm -f ",qepcad_file_pattern)),
