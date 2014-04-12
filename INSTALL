@@ -30,8 +30,8 @@ Please follow the instructions in ~/qesource/README.
 
 
 Supported platforms:
-I have tested qepcad and qepmax package on Mac OS X 10.9.2 and 
+Tested qepcad and qepmax package on Mac OS X 10.9.2, Ubuntu 13.10, and 
 Debian Linux 7.4. Other Linux/Unix variants should be OK, though
 not tested.
 
-There is no way to use this package on Windows OS.
+There is no way to use this package on Windows OS for now.
