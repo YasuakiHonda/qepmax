@@ -9,6 +9,12 @@ Installation instructions are in the file INSTALL.
 Lincese terms can be found in each source files. 
 qepmax package is in GPL v2.
 
+Qepmax package is written by Yasuaki Honda, then Prof. 
+Dr. Reinhard Oldenburg of Goethe-Universität Frankfurt has
+contributed the improvements for allowing the use of logical 
+operators and rational functions as well as better function
+interface.
+
 This file introduces you what is qepcad and what 
 you can do with it using qepmax package.
 
