@@ -17,7 +17,7 @@ qepcad_installed_dir:"~/qesource";
 
 
 
-- Download HTTP://WWW.USNA.EDU/CS/~QEPCAD/INSTALL/SACLIB2.2.6.TAR.GZ
+- Download http://www.usna.edu/CS/~qepcad/INSTALL/saclib2.2.6.tar.gz
 and save it in your home directory.
 - cd ~; tar xvfz saclib2.2.6.tar.gz
 then directory ~/saclib2.2.6 is created.
