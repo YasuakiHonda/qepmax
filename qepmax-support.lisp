@@ -24,13 +24,13 @@ Yasuaki dot Honda at Gmail dot Com
 
 (in-package :maxima)
 
-(defvar *mtimes_char_maxima* '(#\*))
-(defvar *mtimes_char_qepcad* '(#\   ))
+(defvar *mtimes_char_maxima* (coerce "*" 'list))
+(defvar *mtimes_char_qepcad* (coerce " " 'list))
 (defvar *mtimes_char* *mtimes_char_maxima*)
 
 (defun $prepare_for_qepcad ()
-  (setf (get '%and 'strsym) '(#\  #\/ #\\ #\  ))
-  (setf (get '%or 'strsym) '(#\  #\\ #\/ #\  ))
+  (setf (get '%and 'strsym) (coerce " /\ " 'list))
+  (setf (get '%or 'strsym) (coerce " \/ " 'list))
   (setq *mtimes_char* *mtimes_char_qepcad*)
   t)
 
