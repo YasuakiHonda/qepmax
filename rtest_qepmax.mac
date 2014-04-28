@@ -1,4 +1,5 @@
 load(qepmax)$
+load(qepmax)$
 
 qe([[A,x]],x^2>0);
 

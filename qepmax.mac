@@ -95,7 +95,14 @@ infix("/=",80,80);
 infix("%implies",60,60);
 "%implies"(a,b):= %not(a) %or b;
 
-remrule('%not,'all);
+/*
+The following line deletes all the rules on %not, without
+displaying any erros or warnings, hence allowing multiple
+loading of this file safely.
+*/
+errcatch(tellsimp(%not(aa),bb),remrule('%not,'all));
+
+
 matchdeclare (aa, true,bb,true,cc,true,dd,true); 
 tellsimp(%not(true),false); 
 tellsimp(%not(false),true); 
