@@ -62,7 +62,7 @@ Yasuaki dot Honda at Gmail dot Com
 
 #|
 qepcad lex elements:
-variables: declared [a-zA-Z]*
+variables: declared [a-zA-Z][a-zA-Z0-9]*
 number: integer only [0-9]*
 operator: 
 The boolean operators are: /\ , \/ , ~ , ==> , <== , <==>. 
@@ -159,7 +159,7 @@ first letter:
   (let ((out "")
 	c)
     (while (and (characterp (setq c (peek-char nil ist nil :eof)))
-		(alpha-char-p c))
+		(or (alpha-char-p c) (digit-char-p c)))
       (read-char ist nil :eof)
       (setq out (concatenate 'string out (string c))))
     out))

@@ -94,6 +94,8 @@ debug_qepmax:false;
 infix("/=",80,80);
 infix("%implies",60,60);
 "%implies"(a,b):= %not(a) %or b;
+
+remrule('%not,'all);
 matchdeclare (aa, true,bb,true,cc,true,dd,true); 
 tellsimp(%not(true),false); 
 tellsimp(%not(false),true); 
