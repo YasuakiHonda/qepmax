@@ -1,0 +1,62 @@
+/*
+toimplx.mac
+Copyright (C) 2014 ehito
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+or the following URL: http://www.gnu.org/licenses/gpl-2.0.html.
+
+
+Public function: toimplx(x).
+x is a logical expression with operators : andx, orx, negx, implx.
+toimplx(x) generates from x a logical expression which is equivalent
+to x. Rational functions appeared in x are treated with care for
+its domain.
+*/
+
+kill("implx")$ kill("orx")$ kill("andx")$ kill("eqx")$
+infix(implx);
+infix(orx);
+infix(andx);
+infix(eqx);
+matchdeclare(aa,true,bb,true); 
+negx(aa):=(aa)implx(0=1);
+aa orx bb:=(negx(aa))implx(bb);
+aa andx bb:=negx((negx(aa))orx(negx(bb)));
+aa eqx bb:=((aa)andx(bb))orx((negx(bb))andx(negx(aa)));
+
+defrule(sf1,aa>=bb,bb<=aa);
+defrule(sf2,aa>bb,bb<aa);
+defrule(fr1,aa=bb,xthru(aa)=xthru(bb));
+defrule(fr2,aa<bb,xthru(aa)<xthru(bb));
+defrule(fr3,aa<=bb,xthru(aa)<=xthru(bb));
+
+matchdeclare(rr,lambda([x],is(denom(x)#1)),cc,true);
+defrule(cd1,rr=cc,(num(rr)=cc*denom(rr)) andx (negx(denom(rr)=0)));
+defrule(cd2,cc=rr,(num(rr)=cc*denom(rr)) andx (negx(denom(rr)=0)));
+defrule(cd3,cc<=rr, 
+       ( (0<denom(rr)) andx (cc*denom(rr)<=num(rr)) ) orx
+       ( (denom(rr)<0) andx (num(rr)<=cc*denom(rr)) ) );
+defrule(cd4,cc<rr, 
+       ( (0<denom(rr)) andx (cc*denom(rr)<num(rr)) ) orx
+       ( (denom(rr)<0) andx (num(rr)<cc*denom(rr)) ) );
+defrule(cd5,rr<=cc, 
+       ( (denom(rr)<0) andx (cc*denom(rr)<=num(rr)) ) orx
+       ( (0<denom(rr)) andx (num(rr)<=cc*denom(rr)) ) );
+defrule(cd6,rr<cc, 
+       ( (denom(rr)<0) andx (cc*denom(rr)<num(rr)) ) orx
+       ( (0<denom(rr)) andx (num(rr)<cc*denom(rr)) ) );
+
+toimplx1(x):=applyb1(x,sf1,sf2,fr1,fr2,fr3,cd1,cd2,cd3,cd4,cd5,cd6);
+toimplx(x):=toimplx1(toimplx1(x));

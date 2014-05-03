@@ -15,6 +15,9 @@ contributed the improvements for allowing the use of logical
 operators and rational functions as well as better function
 interface.
 
+Further, ehito san has contributed the improvement of the
+treatment of rational functions.
+
 This file introduces you what is qepcad and what 
 you can do with it using qepmax package.
 

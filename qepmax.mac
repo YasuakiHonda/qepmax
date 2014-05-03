@@ -2,6 +2,7 @@
 Qepmax.mac 
 Copyright (C) 2013, 2014 Yasuaki Honda
 Copyrigth (C) 2013 Reinhard Oldenburg
+Copyright (C) 2014 ehito
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -93,74 +94,36 @@ if (not(member('qepcad_on_moa,values))) then
 debug_qepmax:false;
 infix("/=",80,80);
 infix("%implies",60,60);
-"%implies"(a,b):= %not(a) %or b;
 
 /*
-The following line deletes all the rules on %not, without
-displaying any erros or warnings, hence allowing multiple
-loading of this file safely.
+Public function: toimplx(x).
+x is a logical expression with operators : andx, orx, negx, implx.
+toimplx(x) generates a logical expression only using implx.
+Rational functions appeared in x are treated with care for its
+domain.
 */
-errcatch(tellsimp(%not(aa),bb),remrule('%not,'all));
+load("toimplx.mac");
 
+defrule(implx2orand,(aa) implx (bb),(aa) %implies (bb));
+toorand(x):=applyb1(toimplx(x),implx2orand);
+matchdeclare([aa,bb,cc,dd,ee],true);
+defrule(mtox1, aa %and bb, (aa) andx (bb));
+defrule(mtox2, aa %and bb %and cc, (aa) andx (bb) andx (cc));
+defrule(mtox3, aa %and bb %and cc %and dd, (aa) andx (bb) andx (cc) andx (dd));
+defrule(mtox4, aa %and bb %and cc %and dd %and ee, (aa) andx (bb) andx (cc) andx (dd) andx (ee));
+defrule(mtox11, aa %or bb, (aa) orx (bb));
+defrule(mtox12, aa %or bb %or cc, (aa) orx (bb) orx (cc));
+defrule(mtox13, aa %or bb %or cc %or dd, (aa) orx (bb) orx (cc) orx (dd));
+defrule(mtox14, aa %or bb %or cc %or dd %or ee, (aa) orx (bb) orx (cc) orx (dd) orx (ee));
+defrule(mtox20, %not(aa), negx(aa));
+defrule(mtox30, aa %implies bb, (aa) implx (bb));
+defrule(mtox41, aa # bb, negx(aa=bb));
 
-matchdeclare (aa, true,bb,true,cc,true,dd,true); 
-tellsimp(%not(true),false); 
-tellsimp(%not(false),true); 
-tellsimp(%not(%not(aa)),aa); 
-tellsimp(%not(aa %or bb),%not(aa) %and %not(bb)); 
-tellsimp(%not(aa %or bb %or cc),%not(aa) %and %not(bb) %and %not(cc)); 
-tellsimp(%not(aa %or bb %or cc %or dd),%not(aa) %and %not(bb) %and %not(cc) %and %not(dd)); 
-tellsimp(%not(aa %and bb),%not(aa) %or %not(bb));
-tellsimp(%not(aa %and bb %and cc),%not(aa) %or %not(bb) %or %not(cc)); 
-tellsimp(%not(aa %and bb %and cc %and dd),%not(aa) %or %not(bb) %or %not(cc) %or %not(dd)); 
-tellsimp(%not(aa %and bb %and cc %and dd %and ee),%not(aa) %or %not(bb) %or %not(cc) %or %not(dd) %or %not(ee)); 
-tellsimp(%not(aa=bb),aa#bb); 
-tellsimp(%not(aa#bb),aa=bb); 
-tellsimp(%not( aa>bb),aa<=bb); tellsimp(%not( aa<bb),aa>=bb);  
-tellsimp(%not( aa>=bb),aa<bb); tellsimp(%not( aa<=bb),aa>bb);
-
-rationalp(ex):=is(1#denom(ratsimp(ex)));
-matchdeclare(rr,rationalp);
-defrule(cl1,rr=cc,num(ratsimp(rr))=cc*denom(ratsimp(rr)) %and denom(ratsimp(rr))#0);
-defrule(cl2,cc=rr,num(ratsimp(rr))=cc*denom(ratsimp(rr)) %and denom(ratsimp(rr))#0);
-defrule(cl3,rr<cc, denom(ratsimp(rr))#0 %and 
-                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))<denom(ratsimp(rr))*cc)) %and 
-                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))>denom(ratsimp(rr))*cc)) );
-defrule(cl4,cc>rr, denom(ratsimp(rr))#0 %and 
-                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))<denom(ratsimp(rr))*cc)) %and 
-                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))>denom(ratsimp(rr))*cc)) );
-defrule(cl5,rr>cc, denom(ratsimp(rr))#0 %and 
-                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))>denom(ratsimp(rr))*cc)) %and 
-                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))<denom(ratsimp(rr))*cc)) );
-defrule(cl6,cc<rr, denom(ratsimp(rr))#0 %and 
-                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))>denom(ratsimp(rr))*cc)) %and 
-                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))<denom(ratsimp(rr))*cc)) );
-defrule(cl7,rr<=cc, denom(ratsimp(rr))#0 %and 
-                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))<=denom(ratsimp(rr))*cc)) %and 
-                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))>=denom(ratsimp(rr))*cc)) );
-defrule(cl8,cc>=rr, denom(ratsimp(rr))#0 %and 
-                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))<=denom(ratsimp(rr))*cc)) %and 
-                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))>=denom(ratsimp(rr))*cc)) );
-defrule(cl9,rr>=cc, denom(ratsimp(rr))#0 %and 
-                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))>=denom(ratsimp(rr))*cc)) %and 
-                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))<=denom(ratsimp(rr))*cc)) );
-defrule(cl10,cc<=rr, denom(ratsimp(rr))#0 %and 
-                   ((denom(ratsimp(rr))>0) %implies (num(ratsimp(rr))>=denom(ratsimp(rr))*cc)) %and 
-                   ((denom(ratsimp(rr))<0) %implies (num(ratsimp(rr))<=denom(ratsimp(rr))*cc)) );
-
-defrule(ratio1,aa=bb,ratsimp(aa)=ratsimp(bb));
-defrule(ratio2,aa<bb,ratsimp(aa)<ratsimp(bb));
-defrule(ratio3,aa>bb,ratsimp(aa)>ratsimp(bb));
-defrule(ratio4,aa#bb,ratsimp(aa)#ratsimp(bb));
-defrule(ratio5,aa<=bb,ratsimp(aa)<=ratsimp(bb));
-defrule(ratio6,aa>=bb,ratsimp(aa)>=ratsimp(bb));
-
-preRatio(expr):= applyb1(applyb1(expr,ratio1,ratio2,ratio3,ratio4,ratio5,ratio6),
-                cl1,cl2, cl3, cl4, cl5, cl6, cl7,cl8,cl9,cl10);
-
-qe(qs,expr):= block([newexpr:preRatio(expr)],
+mtox(MTF):=applyb1(MTF,mtox1,mtox2,mtox3,mtox4,mtox11,mtox12,mtox13,mtox14,mtox20,mtox30,mtox41);
+qe(QVList, MTF):=qe_old(QVList,toorand(toimplx(mtox(MTF))));
+qe_old(qs,expr):= block([],
                       /* print("converted to"), print(newexpr), */
-                      QCC(qs,newexpr));
+                      QCC(qs,expr));
 
 QCC(qs,expr):=block([vs:listofvars(expr),fv:[],i,gv:map(lambda([x],x[2]),qs)],
   if expr=true or expr=false then return(expr),
@@ -237,6 +200,6 @@ writeLogicalExp(lexp) := block([op, res:""],
    block([exp2:opsubst("/=","#",lexp)],
       return(string(exp2)))  );
 
-isLogicalOp(op) := is(op=?%and) or is(op=?%or);
+isLogicalOp(op) := is(op=?%and) or is(op=?%or) or is(op="%implies");
 
-qepLogicalSymbol(op) := if (op=?%and) then "/\\" else if (op=?%or) then "\\/";
+qepLogicalSymbol(op) := if (op=?%and) then "/\\" else if (op=?%or) then "\\/" else if (op="%implies") then "==>";
