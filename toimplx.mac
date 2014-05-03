@@ -21,8 +21,8 @@ or the following URL: http://www.gnu.org/licenses/gpl-2.0.html.
 Public function: toimplx(x).
 x is a logical expression with operators : andx, orx, negx, implx.
 toimplx(x) generates from x a logical expression which is equivalent
-to x. Rational functions appeared in x are treated with care for
-its domain.
+to x but using implx only. Rational functions appeared in x are
+treated with care for its domain.
 */
 
 kill("implx")$ kill("orx")$ kill("andx")$ kill("eqx")$
