@@ -96,30 +96,52 @@ infix("/=",80,80);
 infix("%implies",60,60);
 
 /*
-Public function: toimplx(x).
+Public function: toimplx(x), defined in toimplx.mac.
 x is a logical expression with operators : andx, orx, negx, implx.
 toimplx(x) generates a logical expression only using implx.
 Rational functions appeared in x are treated with care for its
 domain.
 */
 load("toimplx.mac");
+load("opsubst");
+
+/*
+Function mtox1(exp) accepts maxima conjunctive and
+disjunctive logical expression
+(such as aa %and cc %and dd) and translate it to
+toimplx format (such as aa andx cc andx dd).
+*/
+mtox1(exp):=block([op,arglist,newop,inflag],
+  inflag:true,
+  if (atom(exp)) then return(false),
+  op:op(exp),arglist:args(exp),
+  newop:transop(op),
+  if(newop = false) then return(false),
+  mtoxrec(newop,arglist));
+
+transop(mop):=block([andxop,orxop,mandop,morop],
+  mandop:inpart('(aa %and bb),0),
+  morop:inpart('(aa %or bb),0),
+  andxop:inpart('(aa andx bb),0),
+  orxop:inpart('(aa orx bb),0),
+  if (mop=mandop) then return(andxop),
+  if (mop=morop) then return(orxop),
+  return(false));
+  
+mtoxrec(op,alist):=
+  if(length(alist)=2) then
+    opsubst(op,"[",alist)
+  else
+    opsubst(op,"[",[first(alist),mtoxrec(op,rest(alist))]);
 
 defrule(implx2orand,(aa) implx (bb),(aa) %implies (bb));
 toorand(x):=applyb1(toimplx(x),implx2orand);
 matchdeclare([aa,bb,cc,dd,ee],true);
-defrule(mtox1, aa %and bb, (aa) andx (bb));
-defrule(mtox2, aa %and bb %and cc, (aa) andx (bb) andx (cc));
-defrule(mtox3, aa %and bb %and cc %and dd, (aa) andx (bb) andx (cc) andx (dd));
-defrule(mtox4, aa %and bb %and cc %and dd %and ee, (aa) andx (bb) andx (cc) andx (dd) andx (ee));
-defrule(mtox11, aa %or bb, (aa) orx (bb));
-defrule(mtox12, aa %or bb %or cc, (aa) orx (bb) orx (cc));
-defrule(mtox13, aa %or bb %or cc %or dd, (aa) orx (bb) orx (cc) orx (dd));
-defrule(mtox14, aa %or bb %or cc %or dd %or ee, (aa) orx (bb) orx (cc) orx (dd) orx (ee));
 defrule(mtox20, %not(aa), negx(aa));
 defrule(mtox30, aa %implies bb, (aa) implx (bb));
 defrule(mtox41, aa # bb, negx(aa=bb));
 
-mtox(MTF):=applyb1(MTF,mtox1,mtox2,mtox3,mtox4,mtox11,mtox12,mtox13,mtox14,mtox20,mtox30,mtox41);
+mtox(MTF):=applyb1(MTF,mtox1,mtox20,mtox30,mtox41);
 qe(QVList, MTF):=qe_old(QVList,toorand(toimplx(mtox(MTF))));
 qe_old(qs,expr):= block([],
                       /* print("converted to"), print(newexpr), */
@@ -138,7 +160,7 @@ qepcad(varlist, numfreevar, QFList, formula) := (
     qepcad1(varlist, numfreevar, QFList, formula),
     system(sconcat("bash -c 'export qe=",qepcad_installed_dir,"; $qe/bin/qepcad ",qepcad_option_N," < ",
         qepcad_input_file,
-        " > ",
+        " &> ",
         qepcad_output_file, "'")),
     readQepcad());
     
@@ -203,3 +225,22 @@ writeLogicalExp(lexp) := block([op, res:""],
 isLogicalOp(op) := is(op=?%and) or is(op=?%or) or is(op="%implies");
 
 qepLogicalSymbol(op) := if (op=?%and) then "/\\" else if (op=?%or) then "\\/" else if (op="%implies") then "==>";
+
+
+
+/*
+Qepcad B can may be in infinite loop if syntax error exists in
+the input file.
+You can terminate the qe() command by typing ctrl-C if maxima
+is invoked in the shell, and ctrl-C ctrl-C if maxima is in
+Emacs.
+
+Even after doing so, the qepcad process still may continue to
+run, wasting CPU time. If this is the case, you can use
+kill_qepcad();
+command from Maxima prompt.
+*/
+qepmax_installed_dir: pathname_directory(load_pathname);
+
+kill_qepcad():=block([],
+  system(sconcat(qepmax_installed_dir, "kill_qepcad.sh &> /dev/null")));

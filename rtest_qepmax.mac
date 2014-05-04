@@ -1,43 +1,76 @@
-load("qepmax.mac")$
-load("qepmax.mac")$
+(
+  /*  kill(all), */
+  load("qepmax.mac"),
+  /* The following is a test to see if the loading twice of
+  qepmax.mac causes an error.
+  */
+  load("qepmax.mac"),
+  0);
+0 $
 
 qe([[A,x]],x^2>0);
+false $
 
 qe([[A,x]],x^2>=0);
+true $
 
 qe([[A,x]],x>3 %implies -2*x+5<M);
+M+1>=0 $
 
 qe([[E,x]],x^2<=0);
+true $
 
 qe([[A,x]],(x<-3 %or 3<x) %implies x^2 > a);
+a-9<=0 $
 
 qe([[A,x]],x^2=9 %implies x=a);
+false $
 
 qe([[E,x],[E,y]],y=3*x+1 %and y=m*x-2);
+m-3#0 $
 
 qe([[A,x],[A,y]],%not(y=x^2+1 %and y=m*x));
+(m - 2 < 0) %and (m + 2 > 0) $
 
 qe([[A,x],[A,y]], %not((y-2)^2+x^2=1 %and y=m*x));
+m^2-3<0 $
 
 qe([[A,x]],3*x^2 > m*(x-1)^2+1);
+2*m+3<0 $
 
 qe([[A,x],[A,y]],%not((y<x+1 %and y<-x+1) %and y=a*x+b));
+(a - 1 <= 0) %and (a + 1 >= 0) %and (b - 1 >= 0) $
 
-G:m=x1+x2;
-C: (x2>=0) %and (x1+1>=0) %and (x2-x1^2>=0);
-qe([[E,x1],[E,x2]],G %and C);
-qe([],G %and C),m:-1/4;
+block([G,C],
+  G:m=x1+x2,
+  C: (x2>=0) %and (x1+1>=0) %and (x2-x1^2>=0),
+  qe([[E,x1],[E,x2]],G %and C));
+4*m + 1 >= 0 $
 
-f(x):=1/x^2;
-qe([[A,x]],f(x)#m);
+block([G,C,m],
+  G:-1/4=x1+x2,
+  C: (x2>=0) %and (x1+1>=0) %and (x2-x1^2>=0),
+  qe([],G %and C));
+(2*x1 + 1 = 0) %and (x2-x1^2=0) $
+
+qe([[A,x]],1/x^2#m);
+m<=0 $
 
 qe([[E,x]],m=1/x);
+m#0 $
+
 qe([[A,x]],0<=1/x %implies x>0);
+true $
 
-f(x):=(x+1)/((x-2)*(x-3));
+block([F],
+  F:(x+1)/((x-2)*(x-3)),
+  qe([[E,x]],F=m));
+m^2+14*m+1 >= 0 $
 
-qe([[E,x]],f(x)=m);
-qe([[A,x]],f(x)#m);
+block([F],
+  F:(x+1)/((x-2)*(x-3)),
+  qe([[A,x]],F#m));
+m^2+14*m+1 < 0 $
 
 /*
 qe([[E,x],[E,y],[E,z]],x^2+y^2+z^2=6 %and x+y+z=4 %and v=x*y*z);
