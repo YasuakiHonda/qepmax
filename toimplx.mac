@@ -19,23 +19,25 @@ or the following URL: http://www.gnu.org/licenses/gpl-2.0.html.
 
 
 Public function: toimplx(x).
-x is a logical expression with operators : andx, orx, negx, implx.
+x is a logical expression with operators : andx, orx, negx, implx, replx.
 toimplx(x) generates from x a logical expression which is equivalent
 to x but using implx only. Rational functions appeared in x are
 treated with care for its domain.
 */
 block([cmdlist],
-  cmdlist:["implx","orx","andx","eqx"],
+  cmdlist:["implx","orx","andx","eqx","replx"],
   map(kill,cmdlist),
   map(infix,cmdlist));
 
-matchdeclare([aa,bb,cc],true);
+matchdeclare([aa,bb,cc],true); 
+aa replx bb:=(bb)implx(aa);
 negx(aa):=(aa)implx(0=1);
 aa orx bb:=(negx(aa))implx(bb);
-aa andx bb:=negx((negx(aa))orx(negx(bb)));
-aa eqx bb:=((aa)andx(bb))orx((negx(bb))andx(negx(aa)));
+aa andx bb:=negx((aa)implx(negx(bb)));
+aa eqx bb:=((aa)implx(bb))andx((aa)replx(bb));
 
 defrule(negneg,((aa)implx(0=1))implx(0=1),(aa));
+
 defrule(sf1,aa>=bb,bb<=aa);
 defrule(sf2,aa>bb,bb<aa);
 defrule(fr1,aa=bb,xthru(aa)=xthru(bb));
@@ -59,4 +61,14 @@ defrule(cd6,rr<cc,
        ( (0<denom(rr)) andx (num(rr)<cc*denom(rr)) ) );
 
 toimplx1(x):=applyb1(x,negneg,sf1,sf2,fr1,fr2,fr3,cd1,cd2,cd3,cd4,cd5,cd6);
-toimplx(x):=toimplx1(toimplx1(x));
+toimplx2(x):=toimplx1(toimplx1(x));
+
+defrule(fr1,(aa)implx(all(bb,cc)),all(bb,(aa)implx(cc)));
+defrule(fr2,(aa)implx(ex(bb,cc)),ex(bb,(aa)implx(cc)));
+defrule(fr3,(all(bb,aa))implx(cc),ex(bb,(aa)implx(cc)));
+defrule(fr4,(ex(bb,aa))implx(cc),all(bb,(aa)implx(cc)));
+
+topnfx1(x):=applyb1(x,fr1,fr2,fr3,fr4);
+topnfx(n,x):=if 1<n then topnfx1(topnfx(n-1,x)) else topnfx1(x);
+
+toimplx(x):=topnfx(20,toimplx2(x));
