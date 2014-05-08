@@ -143,7 +143,7 @@ defrule(mtox40, aa # bb, negx(aa=bb));
 defrule(mtox50, false, 0=1);
 defrule(mtox51, true, 0=0);
 
-mtox(MTF):=applyb1(MTF,mtox1,mtox20,mtox30,mtox41,mtox50,mtox51);
+mtox(MTF):=applyb1(MTF,mtox1,mtox20,mtox30,mtox40,mtox50,mtox51);
 qe(QVList, MTF):=qe_old(QVList,toorand(toimplx(mtox(MTF))));
 qe_old(qs,expr):= block([],
                       /* print("converted to"), print(newexpr), */
