@@ -24,11 +24,9 @@ toimplx(x) generates from x a logical expression which is equivalent
 to x but using implx only. Rational functions appeared in x are
 treated with care for its domain.
 */
-block([cmdlist],
-  cmdlist:["implx","orx","andx","eqx","replx"],
-  map(kill,cmdlist),
-  map(infix,cmdlist));
 
+map(kill,["implx","replx","orx","andx","eqx"]);
+map(infix,[implx,replx,orx,andx,eqx]);
 matchdeclare([aa,bb,cc],true); 
 aa replx bb:=(bb)implx(aa);
 negx(aa):=(aa)implx(0=1);
@@ -37,6 +35,28 @@ aa andx bb:=negx((aa)implx(negx(bb)));
 aa eqx bb:=((aa)implx(bb))andx((aa)replx(bb));
 
 defrule(negneg,((aa)implx(0=1))implx(0=1),(aa));
+
+cs(f):=
+(ex(a,ex(b,all(x, (f(x))eqx((a<x)andx(x<b)) )))) orx 
+(ex(a,ex(b,all(x, (f(x))eqx((a<=x)andx(x<b)) )))) orx 
+(ex(a,ex(b,all(x, (f(x))eqx((a<x)andx(x<=b)) )))) orx 
+(ex(a,ex(b,all(x, (f(x))eqx((a<=x)andx(x<=b)) )))) orx 
+(ex(a,all(x, (f(x))eqx(a<x) ))) orx 
+(ex(a,all(x, (f(x))eqx(a<=x) ))) orx 
+(ex(b,all(x, (f(x))eqx(x<b) ))) orx 
+(ex(b,all(x, (f(x))eqx(x<=b) ))) orx (all(x,f(x)));
+
+al1(f):=ex(x,f(x));
+al2(f):=ex(x1,ex(x2,(negx(x1=x2)) andx (f(x1)) andx (f(x2))));
+al3(f):=ex(x1,ex(x2,ex(x3,(negx(x1=x2)) andx (negx(x1=x3)) andx (negx(x2=x3)) andx (f(x1)) andx (f(x2)) andx (f(x3)))));
+al4(f):=ex(x1,ex(x2,ex(x3,ex(x4,(negx(x1=x2)) andx (negx(x1=x3)) andx (negx(x1=x4)) andx (negx(x2=x3)) andx (negx(x2=x4)) andx (negx(x3=x4)) andx (f(x1)) andx (f(x2)) andx (f(x3)) andx (f(x4))))));
+al5(f):=ex(x1,ex(x2,ex(x3,ex(x4,ex(x4,(negx(x1=x2)) andx (negx(x1=x3)) andx (negx(x1=x4)) andx (negx(x1=x5)) andx (negx(x2=x3)) andx (negx(x2=x4)) andx (negx(x2=x5)) andx (negx(x3=x4)) andx (negx(x3=x5)) andx (negx(x4=x5)) andx (f(x1)) andx (f(x2)) andx (f(x3)) andx (f(x4))) andx (f(x5))))));
+
+ex0(f):=all(x,negx(f(x)));
+ex1(f):=(al1(f)) andx (negx(al2(f)));
+ex2(f):=(al2(f)) andx (negx(al3(f)));
+ex3(f):=(al3(f)) andx (negx(al4(f)));
+ex4(f):=(al4(f)) andx (negx(al5(f)));
 
 defrule(sf1,aa>=bb,bb<=aa);
 defrule(sf2,aa>bb,bb<aa);
@@ -63,12 +83,16 @@ defrule(cd6,rr<cc,
 toimplx1(x):=applyb1(x,negneg,sf1,sf2,fr1,fr2,fr3,cd1,cd2,cd3,cd4,cd5,cd6);
 toimplx2(x):=toimplx1(toimplx1(x));
 
-defrule(fr1,(aa)implx(all(bb,cc)),all(bb,(aa)implx(cc)));
-defrule(fr2,(aa)implx(ex(bb,cc)),ex(bb,(aa)implx(cc)));
-defrule(fr3,(all(bb,aa))implx(cc),ex(bb,(aa)implx(cc)));
-defrule(fr4,(ex(bb,aa))implx(cc),all(bb,(aa)implx(cc)));
+defrule(Fr1,(aa)implx(all(bb,cc)),all(bb,(aa)implx(cc)));
+defrule(Fr2,(aa)implx(ex(bb,cc)),ex(bb,(aa)implx(cc)));
+defrule(Fr3,(all(bb,aa))implx(cc),ex(bb,(aa)implx(cc)));
+defrule(Fr4,(ex(bb,aa))implx(cc),all(bb,(aa)implx(cc)));
+defrule(Fr5,(aa)implx(nf(bb,cc)),nf(bb,(aa)implx(cc)));
+defrule(Fr6,(aa)implx(fn(bb,cc)),fn(bb,(aa)implx(cc)));
+defrule(Fr7,(nf(bb,aa))implx(cc),fn(bb,(aa)implx(cc)));
+defrule(Fr8,(fn(bb,aa))implx(cc),nf(bb,(aa)implx(cc)));
 
-topnfx1(x):=applyb1(x,fr1,fr2,fr3,fr4);
+topnfx1(x):=applyb1(x,Fr1,Fr2,Fr3,Fr4,Fr5,Fr6,Fr7,Fr8);
 topnfx(n,x):=if 1<n then topnfx1(topnfx(n-1,x)) else topnfx1(x);
 
 toimplx(x):=topnfx(20,toimplx2(x));
