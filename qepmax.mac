@@ -101,8 +101,9 @@ x is a logical expression with operators : andx, orx, negx, implx.
 toimplx(x) generates a logical expression only using implx.
 Rational functions appeared in x are treated with care for its
 domain.
-*/
 load("toimplx.mac");
+*/
+load("ratsimpx2.mac");
 load("opsubst");
 
 /*
@@ -110,7 +111,7 @@ Function mtox1(exp) accepts maxima conjunctive and
 disjunctive logical expression
 (such as aa %and cc %and dd) and translate it to
 toimplx format (such as aa andx cc andx dd).
-*/
+
 mtox1(exp):=block([op,arglist,newop,inflag],
   inflag:true,
   if (atom(exp)) then return(false),
@@ -145,6 +146,8 @@ defrule(mtox51, true, 0=0);
 
 mtox(MTF):=applyb1(MTF,mtox1,mtox20,mtox30,mtox40,mtox50,mtox51);
 qe(QVList, MTF):=qe_old(QVList,toorand(toimplx(mtox(MTF))));
+*/
+qe(QVList, MTF):=qe_old(QVList,ratsimpx2(MTF));
 qe_old(qs,expr):= block([],
                       /* print("converted to"), print(newexpr), */
                       QCC(qs,expr));
