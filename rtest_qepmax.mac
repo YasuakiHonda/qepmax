@@ -1,5 +1,5 @@
 (
-  /*  kill(all), */
+  kill(x,y,m,M,a,b,x1,x2,G,C),
   load("qepmax.mac"),
   /* The following is a test to see if the loading twice of
   qepmax.mac causes an error.
@@ -71,6 +71,54 @@ block([F],
   F:(x+1)/((x-2)*(x-3)),
   qe([[A,x]],F#m));
 m^2+14*m+1 < 0 $
+
+qe([[A,x]],true %implies true);
+true $
+
+qe([], true);
+true $
+
+qe([], false);
+false $
+
+qe([], x>3 %or x=3);
+x>=3 $
+
+qe([], x>=3 %and x<=3);
+x-3=0 $
+
+/* error cases in quantified variable list */
+errcatch(qe([A,x],x>0));
+[] $
+
+errcatch(qe([[Y,y]], y<0));
+[] $
+
+errcatch(qe([[X,x]], x=3));
+[] $
+
+errcatch(qe([[Xk,x]], x=3));
+[] $
+
+errcatch(qe([[X33a,x]], x=3));
+[] $
+
+/* Xk quantifier */
+qe([[X1, x]], x^3-x^2+x/3-1/27=0);
+true $
+
+qe([[X2, x]], x^3-3*x+m=0);
+true $
+
+qe([[X3, x]], x^3+x^2/2-5*x/2+1=0);
+true $
+
+/* nexted qe() */
+qe([[A,x]], x>0 %implies qe([[E,y]], y>0 %and x*y=1));
+true $
+
+qe([[A,x]], qe([[E,y]], y>0 %and x*y=1) %implies x>0);
+true $
 
 /*
 qe([[E,x],[E,y],[E,z]],x^2+y^2+z^2=6 %and x+y+z=4 %and v=x*y*z);
