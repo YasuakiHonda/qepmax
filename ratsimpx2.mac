@@ -53,3 +53,12 @@ defrule(cd6,rr<cc,
 
 ratsimpx1(x):=applyb1(x,fto01,tto00,sf1,sf2,fr1,fr2,fr3,fr4,fr5,cd1,cd2,cd3,cd4,cd5,cd6);
 ratsimpx2(x):=ratsimpx1(ratsimpx1(x));
+
+adddm(f):=block([dmX,dmY],
+  if atom(f) then return(f),
+  if is(op(f)="/") then 
+    (part(f,1)+dmX^2-1+(1-dmX)*(1+dmX))
+   /(part(f,2)+dmY+dmY/part(f,2)-dmY*(1+1/part(f,2))) else f)$
+Strict():=simp:false$
+nzden(f):=block([g:scanmap(adddm,f,bottomup)],simp:true,qe([],g))$
+nzdenqe(l,f):=block([g:scanmap(adddm,f,bottomup)],simp:true,qe(l,g))$

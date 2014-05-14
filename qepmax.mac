@@ -147,7 +147,13 @@ defrule(mtox51, true, 0=0);
 mtox(MTF):=applyb1(MTF,mtox1,mtox20,mtox30,mtox40,mtox50,mtox51);
 qe(QVList, MTF):=qe_old(QVList,toorand(toimplx(mtox(MTF))));
 */
-qe(QVList, MTF):=qe_old(QVList,ratsimpx2(MTF));
+qe(QVList, MTF):=
+if (simp=false) then
+    block([g:scanmap(adddm,MTF, bottomup)],
+          simp:true,qe_old(QVList,ratsimpx2(g)))
+else
+    qe_old(QVList,ratsimpx2(MTF));
+
 qe_old(qs,expr):= block([],
                       /* print("converted to"), print(newexpr), */
                       QCC(qs,expr));

@@ -120,6 +120,22 @@ true $
 qe([[A,x]], qe([[E,y]], y>0 %and x*y=1) %implies x>0);
 true $
 
+(Strict(),qe([],y=x/x));
+(x # 0) %and (y-1 = 0) $
+
+(Strict(),qe([],x=x^2/x));
+x # 0 $
+
+(Strict(),qe([],f=1/(x/(y/z))));
+(x # 0) %and (y # 0) %and (z # 0) %and (f*x*z-y = 0) $
+
+(Strict(),qe([],0/(1-x)<1/x));
+(x-1 # 0) %and (x > 0) $
+
+(Strict(),qe([[A,x]],(a<=x^2/x) %eq (b<x)));
+(a = 0) %and (b = 0) $
+
+qe([[A,a],[A,b]], qe([[A,x]],(Strict(),qe([],a<=x^2/x)) %eq (b<x)) %eq ((a=0) %and (b=0)));
 /*
 qe([[E,x],[E,y],[E,z]],x^2+y^2+z^2=6 %and x+y+z=4 %and v=x*y*z);
 */
