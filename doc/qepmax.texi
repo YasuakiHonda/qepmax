@@ -32,7 +32,7 @@ operators and rational functions as well as better function
 interface.
 
 Further, ehito-san has contributed the improvement of the
-treatment of rational functions, nexted qe() call, and 
+treatment of rational functions, nested qe() call, and 
 strict rational function treatment.
 
 Hereafter is the quick introduction of:
@@ -45,7 +45,7 @@ What does Qepcad B do?
 What is qepmax package and how to use it?
 @end itemize
 
-@b{What is Quantifier Elimination}
+@unnumberedsubsec What is Quantifier Elimination
 A large size of problems can be expressed as a first order
 predicate logic with the following properties:
 @itemize @bullet
@@ -89,7 +89,7 @@ Using the quantifier elimination, we obtain a condition on a:
 So, while a is in this range, the circle and the line cross, but
 they don't cross if a is not in the range above.
 
-@b{What does Qepcad B do?}
+@unnumberedsubsec What does Qepcad B do?
 Qepcad B is a software that implements a quantifier elimination
 algorithm called Cylindrical Algebraic Decomposition (CAD).
 The software is developed by Prof. Chris Brown of US Naval Academy.
@@ -108,7 +108,7 @@ It is a fun to use Qepcad B directly from its command line
 interface, as it provides many commands and options to use
 during the interactive sessions. 
 
-@b{What is qepmax package and how to use it?}
+@unnumberedsubsec What is qepmax package and how to use it?
 Qepmax is a Maxima package that calls Qepcad B internally using
 sysmtem() function to process Talski sentence represented using
 Maxima syntax.
@@ -116,7 +116,7 @@ Maxima syntax.
 Assuming it is correctly installed according to INSTALL, you
 can load the package by:
 @example
-(%i1) load(``qepmax.mac'');
+(%i1) load("qepmax.mac");
 @end example
 
 Qepmax package provides a function @code{qe(QFList, aLogicalExp)}.
@@ -186,15 +186,14 @@ Any quantified variables specified in the @var{QVList} can be used in the
 also be used. They are called free variables.
 
 Couple of examples of @var{LogicalExp} are:
-@examples
+@example
 x^2>=0
 y=x/2+m %and y<x+1 %and y<-x+1
-@end examples
+@end example
 
 @code{qe} returns a boolean formula which only contains free variables  in 
 the @var{LogicalExp}, still the returned formula is equivalent to 
 @var{LogicalExp} quantified by @var{QVList}.
-@example
 
 @end deffn
 
