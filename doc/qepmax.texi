@@ -58,14 +58,14 @@ terms are polinomials or rational functions
 @end itemize
 
 A logical formula with some of its variables quntified is 
-called a Talski sentence. 
+called a Tarski sentence. 
 Example: a circle @math{x^2+y^2=1} and a line @math{y=x/2+1/3} 
-crosses with each other. Talski sentence for this is:
+crosses with each other. Tarski sentence for this is:
 @math{E x, E y, x^2+y^2=1 and y=x/2+1/3}
 where E denotes the existential quantifier.
 
 The quntifier elimination is a technique to obtain the
-equivarent condition to the given Talski sentence. The
+equivarent condition to the given Tarski sentence. The
 resulted condition does not contain any quantified variables.
 
 By using the quantifier elimination technique, we can obtain 
@@ -80,7 +80,7 @@ we will obtain
 @math{false}
 since there is no such intersection point (x,y).
 
-Further more, considering the following Talski sentence with free variable a:
+Further more, considering the following Tarski sentence with free variable a:
 @math{E x, E y, x^2+y^2=1 and y=x/2+a}
 
 Using the quantifier elimination, we obtain a condition on a:
@@ -98,11 +98,11 @@ The homepage of the software is:
 
 On starting the program Qepcad B, the interactive session starts.
 You give a list of variables, number of free variables,
-a list of quntified variables, and a Talski sentence with Qepcad B 
+a list of quntified variables, and a Tarski sentence with Qepcad B 
 syntax during the session. Alternatively, you can supply all
 such information in a file and Qepcad B processes it.
 Then the program computes the equivarent condition to the
-specified Talski sentence, only including the free variables. 
+specified Tarski sentence, only including the free variables. 
 
 It is a fun to use Qepcad B directly from its command line 
 interface, as it provides many commands and options to use
@@ -110,7 +110,7 @@ during the interactive sessions.
 
 @unnumberedsubsec What is qepmax package and how to use it?
 Qepmax is a Maxima package that calls Qepcad B internally using
-sysmtem() function to process Talski sentence represented using
+sysmtem() function to process Tarski sentence represented using
 Maxima syntax.
 
 Assuming it is correctly installed according to INSTALL, you
@@ -163,7 +163,7 @@ appeared in the Quantifier Elimination explanation.
 
 @var{QFVList} is a list of pairs (two element list) of a quantifier 
 and a variable. A quantifier is one of @var{A,E,F,G,C},and @var{Xk}, where k
-is a natural number. Variables are ordinal Maxima variables, however,
+is a positive integer. Variables are ordinal Maxima variables, however,
 indexed variables are not supported. Quantifier @var{A} is the universal
 quantifier (for all). @var{E} is the existential quantifier (there exists).
 @var{F,G,C} are described in Qepcad B homepage. @var{Xk} is similar to

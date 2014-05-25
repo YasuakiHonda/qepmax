@@ -88,9 +88,6 @@ if (not(member('qepcad_file_pattern,values))) then
 if (not(member('qepcad_option,values))) then
   qepcad_option:" +N20000000 +L10000 ";
 
-if (not(member('qepcad_on_moa,values))) then
-  qepcad_on_moa:false;
-
 debug_qepmax:false;
 infix("/=",80,80);
 infix("%implies",60,60);
@@ -168,10 +165,7 @@ QCC(qs,expr):=block([vs:listofvars(expr),fv:[],i,gv:map(lambda([x],x[2]),qs)],
   if expr=true or expr=false then return(expr),
   for i:1 thru length(vs) do if not(member(vs[i],gv)) then fv:append(fv,[vs[i]]),
   if qs=[] then (gv:[tempvar],qs:[[A,tempvar]]),
-  if qepcad_on_moa then
-    qepcad1(append(fv,gv),length(fv),qs,expr)
-  else
-    qepcad(append(fv,gv),length(fv),qs,expr));
+  qepcad(append(fv,gv),length(fv),qs,expr));
 
 XQF_syntax_check(vsymbol):=block([vstr:string(vsymbol), i],
   if (substring(vstr,1,2)#"X") then error("qe: quantifier should be one of A,E,F,G,C,Xk"),
