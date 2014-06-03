@@ -178,7 +178,7 @@ XQF_syntax_check(vsymbol):=block([vstr:string(vsymbol), i],
 qepcad(varlist, numfreevar, QFList, formula) := (
     system(sconcat("rm -f ",qepcad_file_pattern)),
     qepcad1(varlist, numfreevar, QFList, formula),
-    system(sconcat("sh -c 'export qe=",qepcad_installed_dir,"; $qe/bin/qepcad ",qepcad_option," < ",
+    system(sconcat("bash -c 'export qe=",qepcad_installed_dir,"; $qe/bin/qepcad ",qepcad_option," < ",
         qepcad_input_file,
         " &> ",
         qepcad_output_file, "'")),
