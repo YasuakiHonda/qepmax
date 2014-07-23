@@ -228,10 +228,14 @@ readQepcad() :=
        parse_string(concat(?qepcadlex(res)," ;"))));
 
 writeLogicalExp(lexp) := block([op, res:""],
-  if atom(lexp) then return(string(lexp)),
-  op:op(lexp),
-  if op = false then return(string(lexp)),
-  if isLogicalOp(op) then block([],
+  if not(atom(lexp)) then op:op(lexp),
+  if atom(lexp) then return(string(lexp)) 
+  else if op = false then return(string(lexp))
+  else if isETF(lexp) then block([],
+    if op="#" then op:"/=",
+    res:sconcat("[",lhs(lexp),op,"_root_",part(rhs(lexp),1),"(",part(rhs(lexp),2),")","]"),
+    return(res))
+  else if isLogicalOp(op) then block([],
     res:"[",
     for i:1 thru length(lexp) do block([],
       res:sconcat(res, "[", writeLogicalExp(part(lexp,i)), "]"),
@@ -241,6 +245,10 @@ writeLogicalExp(lexp) := block([op, res:""],
   else
    block([exp2:opsubst("/=","#",lexp)],
       return(string(exp2)))  );
+
+isETF(exp):=is(atom(exp)=false) and isOrderOp(op(exp)) and is(atom(rhs(exp))=false) and is(op(rhs(exp))=op(etf_root(k,exp1)));
+
+isOrderOp(op):=is(op=">") or is(op="<") or is(op=">=") or is(op="<=") or is(op="=") or is(op="#");
 
 isLogicalOp(op) := is(op=?%and) or is(op=?%or) or is(op="%implies");
 
