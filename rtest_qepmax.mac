@@ -151,3 +151,33 @@ a>0 $
 
 ev(qe([[E,x1],[E,x2]],(x1=etf_root(1,f(x1))) %and (x2=etf_root(-1,f(x2))) %and x1=-x2),f(x):=x^2-a);
 a>=0 $
+
+qe([],x>etf_root(2,x^2-a^2));
+(a # 0) %and (x-a > 0) %and (x+a > 0)$
+
+qe([[E,x]],x=etf_root(2,x^2-a^2));
+a#0 $
+
+qe([],x>etf_root(2,x^2));
+false $
+
+qe([[E,x]],x=etf_root(1,x^2-2) %and x<-1);
+true $
+
+qe([[E,x]],x=etf_root(1,x^2-2) %and x<-rat(1.41421356));
+true $
+
+qe([[E,x]],x=etf_root(2,x^2-2) %and x>rat(1.41421357));
+false $
+
+qe([[E,x1],[E,x2]],x1=etf_root(1,f(x1,y)) %and x2=etf_root(2,f(x2,y)) %and (x2-x1<1/2)),f(x,y):=x^2+y^2-1;
+(y-1 < 0) %and (y+1 > 0) %and (16*y^2-15 > 0) $
+
+errcatch(ev(qe([[E,x1],[E,x2],[E,y]],x1=etf_root(1,f(x1,y)) %and x2=etf_root(2,f(x2,y)) %and (x2-x1<1/2)),f(x,y):=x^2+y^2-1));
+[] $
+
+qe([[E,y],[E,x1],[E,x2]],x1=etf_root(1,f(x1,y)) %and x2=etf_root(2,f(x2,y)) %and (x2-x1<1/2)),f(x,y):=x^2+y^2-1;
+true $
+
+qe([],x1=etf_root(1,f(x1,y)) %and x2=etf_root(2,f(x2,y)) %and (x2-x1<1/2)),f(x,y):=x^2+y^2-1;
+(x1 < 0) %and (x2 > 0) %and (y^2+x1^2-1 = 0) %and (y^2+x2^2-1 = 0) %and (16*y^2-15 > 0)$
