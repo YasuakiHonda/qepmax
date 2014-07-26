@@ -196,8 +196,7 @@ qepcad(varlist, numfreevar, QFList, formula) := (
     readQepcad());
     
 qepcad1(varlist, numfreevar, QFList, formula) :=
-  block([file, ost, old_display_mode:display2d,noErr:false,lexp],
-    lexp:writeLogicalExp(formula,varlist),
+  block([file, ost, old_display_mode:display2d,noErr:false],
     if length(varlist)=0 then error("qepcad: varlist is a list of at least one varibles; found: ", varlist),
     file:qepcad_input_file,
     ost:openw(file),
@@ -212,13 +211,13 @@ qepcad1(varlist, numfreevar, QFList, formula) :=
       printf(ost,"~d~%", numfreevar),
       for i:1 thru length(QFList) do block([QFS,QFV],[QFS,QFV]:QFList[i],
         printf(ost,"(~a ~a)", QFS, QFV)),
+      printf(ost, "[ ~a ].~%finish~%", writeLogicalExp(formula,varlist)),
       noErr:true
       ),
-    printf(ost, "[ ~a ].~%finish~%", lexp),
     restore_maxima(),
     display2d:old_display_mode,
     close(ost),
-    return(noErr));
+    if not(noErr) then error("qepcad1 detected error while creating", qepcad_input_file));
 
 readQepcad() :=
   block([file:qepcad_output_file,
