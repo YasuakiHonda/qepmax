@@ -110,7 +110,7 @@ during the interactive sessions.
 
 @unnumberedsubsec What is qepmax package and how to use it?
 Qepmax is a Maxima package that calls Qepcad B internally using
-sysmtem() function to process Tarski sentence represented using
+system() function to process Tarski sentence represented using
 Maxima syntax.
 
 Assuming it is correctly installed according to INSTALL, you
@@ -181,6 +181,19 @@ atomic formulas are restricted to multivariate polynomials or rational functions
 with coefficients being rational numbers. Atomic formula may also be a maxima
 function which returns a boolean formula.
 
+@code{Qepmax} supports the Extended Tarski Formula, the atomic formula
+of the form @code{var op etf_root(k, polynomial)}. Detailed semantics
+of this atomic formula is difficult explain here. Instead you should
+refer to the following URL
+@url{http://www.usna.edu/CS/~qepcad/B/user/ETF.html}.
+
+Here I give you a very typical example and its meaning. In the Q.E.,
+you may want to express some conditions on one of roots of an
+equation. Extended Tarski Formula can be used for this purpose. For an
+example, you can specify that @var{x} is a second smallest root of
+@code{x^2=2} by the atomic formula @code{x=etf_root(2,x^2-2)}. This is
+a shortcut of expressing that x is sqrt(2).
+
 Any quantified variables specified in the @var{QVList} can be used in the
 @var{LogicalExp}. Variables that are not specified in the @var{QVList} can
 also be used. They are called free variables.
@@ -196,6 +209,71 @@ the @var{LogicalExp}, still the returned formula is equivalent to
 @var{LogicalExp} quantified by @var{QVList}.
 
 @end deffn
+
+@defvr {Option variable} qepcad_installed_dir
+Default value: @code{"~/qepmax/qesource"}
+
+By extracting Qepcad B source tarball, all the files are placed in the 
+directory @code{qesource}. This variable needs to be set up to point 
+that directory.
+
+@end defvr
+
+@defvr {Option variable} qepcad_input_file
+Default value: @code{sconcat(maxima_tempdir, "/qepcad_input.txt")}
+
+@code{Qepmax} creates temporary files during its execution. One is
+the input file to the qepcad command. This variable can be used to
+specify the file path and the file name of the input file.
+
+The default value is the concatenation of @code{maxima_tempdir} and
+@code{"/qepcad_input.txt"}. Note that if you change the value of this
+variable, you should also consider to change the value of the variable
+@code{qepcad_file_pattern}.
+
+@end defvr
+
+@defvr {Option variable} qepcad_input_file
+Default value: @code{sconcat(maxima_tempdir, "/qepcad_output.txt")}
+
+@code{Qepmax} creates temporary files during its execution. One is
+the output file to the qepcad command. This variable can be used to
+specify the file path and the file name of the output file.
+
+The default value is the concatenation of @code{maxima_tempdir} and
+@code{"/qepcad_output.txt"}. Note that if you change the value of this
+variable, you should also consider to change the value of the variable
+@code{qepcad_file_pattern}.
+
+@end defvr
+
+@defvr {Option variable} qepcad_file_pattern
+Default value: @code{sconcat(maxima_tempdir,"/qepcad_*.txt")}
+
+@code{Qepmax} creates temporary files during its execution. Prior
+to the creation, if exists, @code{qepmax} deletes such temporary
+files using @code{rm} command using @code{system()} function.
+This variable is used to specify the files to be deleted.
+
+The default value is the concatenation of @code{maxima_tempdir} and
+@code{"/qepcad_*.txt"}, which are good for default file names of
+the input and output files. If you change the value of @code{qepcad_input_file}
+and / or @code{qepcad_output_file}, you should also consider to change
+the value of this variable.
+
+@end defvr
+
+@defvr {Option variable} qepcad_option
+Default value: @code{" +N20000000 +L10000 "}
+
+@code{Qepcad B} accepts several options. This variable is used to
+specify such options to be passed.
+
+The default value is " +N20000000 +L10000 ", which allocates more
+memory to the computation library used in @code{qepcad}.
+
+@end defvr
+
 
 
 @c Local Variables: 
