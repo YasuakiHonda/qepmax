@@ -292,9 +292,18 @@ isETF2(exp):=is(atom(exp)=false) and isOrderOp(op(exp)) and is(atom(lhs(exp))=fa
 
 isOrderOp(op):=is(op=">") or is(op="<") or is(op=">=") or is(op="<=") or is(op="=") or is(op="#");
 
-isLogicalOp(op) := is(op=?%and) or is(op=?%or) or is(op="%implies");
+versionCode():=block([vlist],
+  vlist:map(parse_string,split(args(build_info())[1],".")),
+  vlist[3]+100*(vlist[2]+100*vlist[1]));
 
-qepLogicalSymbol(op) := if (op=?%and) then "/\\" else if (op=?%or) then "\\/" else if (op="%implies") then "==>";
+if versionCode()<53600 then
+  (isLogicalOp(op) := is(op=?%and) or is(op=?%or) or is(op="%implies"),
+   qepLogicalSymbol(op) := if (op=?%and) then "/\\" else if (op=?%or) then "\\/" else if (op="%implies") then "==>")
+
+else
+  (isLogicalOp(op) := is(op="%and") or is(op="%or") or is(op="%implies"),
+  qepLogicalSymbol(op) := if (op="%and") then "/\\" else if (op="%or") then "\\/" else if (op="%implies") then "==>");
+
 
 
 
