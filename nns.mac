@@ -1,0 +1,214 @@
+/* Copyrigth 2016 Ehito */
+/* GPL 2 */
+
+showtime:on$
+/* display2d:false$ */
+prt(x):=null$
+prt(x):=print(x)$
+
+/* compare length function */
+comparelength(f,g):=length(f)<=length(g)$
+comparelength2(f,g):=length(g)<=length(f)$
+
+/* cnf dnf */
+infix(Or,60,40)$
+infix(And,60,40)$
+
+matchdeclare([aa,bb,cc,dd,ee,ff,gg,aa1,bb1,cc1,dd1,ee1,ff1,gg1],true)$
+
+defrule(ru05r, (aa) Or ((bb) And (cc)),
+ ((aa) Or (bb)) And ((aa) Or (cc)))$
+defrule(ru08r, ((bb) And (cc)) Or (aa),
+ ((aa) Or (bb)) And ((aa) Or (cc)))$
+
+defrule(ru05a, (aa) And ((bb) Or (cc)),
+ ((aa) And (bb)) Or ((aa) And (cc)))$
+defrule(ru08a, ((bb) Or (cc)) And (aa),
+ ((aa) And (bb)) Or ((aa) And (cc)))$
+
+defrule(ru00r, (aa) Or (bb), (aa) %or (bb))$
+defrule(ru00a, (aa) And (bb), (aa) %and (bb))$
+
+orand2orand(f):=block([g],g:f,
+if atom(g) then return(g),
+if op(g)="%or" then g:xreduce("Or",args(g)),
+if op(g)="%and" then g:xreduce("And",args(g)),g)$
+
+cnf(f):=applyb2(applyb2(scanmap(orand2orand,f),ru05r,ru08r),ru00r,ru00a)$
+dnf(f):=applyb2(applyb2(scanmap(orand2orand,f),ru05a,ru08a),ru00r,ru00a)$
+
+/* necessary condition */
+ncond(f):=block([exs,L],L:[],
+exs:fullmap(lambda([x],[E,x]),
+sort(rest(full_listify(powerset(setify(listofvars(f))))),comparelength)),
+for k:1 thru length(exs) do
+ (q:dnf(qe(part(exs,k),f)),prt(q),L:append(L,[q])),
+return((substpart("%and",L,0))%and(f))
+)$
+
+/* non-nonsense */
+nns(f):=block([F,L,M],
+if atom(f) then return(f)
+elseif op(f)="%and" then
+ (F:sort(args(f),comparelength2),L:setify(F),
+ for k:1 thru length(f) do
+ (M:disjoin(part(F,k),L),print(M),
+ if qe([],(substpart("%and",M,0))%implies(f))=true then L:M),
+ return(substpart("%and",L,0)))
+elseif op(f)="%or" then
+ (F:sort(args(f),comparelength2),L:setify(F),
+ for k:1 thru length(f) do
+ (M:disjoin(part(F,k),L),print(M),
+ if qe([],(f)%implies(substpart("%or",M,0)))=true then L:M),
+ return(substpart("%or",L,0)))
+else f)$
+
+/*
+f:qe([],(a^2=1)%and(b^2=1));
+nns(f);
+nns(cnf(f));
+*/
+
+/* non-nonsense scan */
+nnscan(f):=scanmap(nns,f)$
+
+/* non-nonsense scan to dnf */
+nnscand(f):=scanmap(nns,dnf(f))$
+
+/* non-nonsense set */
+nnss(f):=block([f1,f2,f3,q,nns4],
+if mode=d then nns4(g):=nnscand(g) else nns4(g):=nns(g),
+prt("pre-simplified formula"),f1: dnf (qe ([],f) ) ,
+if atom(f1) then return(f1),
+prt(length(f1)),prt(f1),prt("necessary condition"),
+if op(f1)="%or" then
+ (f2:[],
+  for k:1 thru length(f1) do
+   (q:ncond(part(f1,k)),prt(k),prt(q),f2:append(f2,[q])),
+  f2:substpart("%or",f2,0))
+else
+ (f2:dnf(ncond(f1)),prt(f2)),
+prt("simplifing..."),
+if op(f2)="%or" then
+ (f3:[],
+  for k:1 thru length(f2) do
+   (q:qe([],part(f2,k)),prt(k),prt(q),f3:append(f3,[q])),
+  prt("nnscanning..."),f3:substpart("%or",f3,0),prt(f3),return(nns4(f3)))
+else q:qe([],f2),prt(q),prt("nnscanning..."),return(nns4(q))
+)$
+
+/* nnss with double negation */
+nnssdn(f):=qe([],%not(nnss(%not(f))))$
+
+/*
+qe([],x^2=1);nnss(%);
+qe([[X2,x]],x^2+a*x+1=0);nnss(%);
+(((x>=0)%and(x=0))%or((x>=1)%and(x=1)))%and((y>=0)%and(y=0));nnss(%);
+qe([[A,x]],(x=1)%eq(x^2+a*x+b=0));nnss(%);
+qe([[A,x]],(x^2+x=1)%implies(x^2+a*x=b^2))%and(b<0);nnss(%);
+a^2+b^2+c^2+d^2=0;nnss(%);
+((x-1/x)^2+(y^2-4*y+5)^3+(z+1)^2/z^4<=1)%and(x<0);nnss(%);
+qe([[E,x]],"%and"(0<=x,x<=1,y=x^2-2*a*x));nnss(%);
+(x^2-1)*(x^2-4)<0;nnss(%);
+(x^2-1)*(x^2-4)*(x^2-9)<0;nnss(%);
+x^3+y^3+z^3=3*x*y*z;nnss(%);
+x^3+y^3+z^3>=3*x*y*z;nnss(%);
+x^3+y^3+z^3<=3*x*y*z;nnss(%);
+x^3+y^3+z^3>3*x*y*z;nnssdn(%);
+x^3+y^3+z^3<3*x*y*z;nnssdn(%);
+qe([[A,x]],(x^2+x-1=0)%eq(a*x^2+b*x+c=0));nnss(%);
+(a^2+b^2<=2)%and(a*b>=1);nnss(%);
+(a^2+b^2+c^2<=3)%and(a*b*c>=1);nnss(%);
+*/
+
+/* nnsolvexx */
+
+nnsolve(f):=block([g,len,q,org],
+[linsolvewarn]:false,
+if nnsqesolve=false then linsolve_params:true else linsolve_params:false,
+if f=true then return(f),
+if op(f)="%and" then fs:f else fs:flatten([f,0]),
+prt("solving..."),prt(fs),
+%rnum_list:[],
+g:map(lambda([l],substpart("%and",l,0)),
+      solve(args(fs),listofvars(fs))),
+len:length(%rnum_list),
+if len#0 then
+ (for k:1 thru len do g:subst(concat(s,k),part(%rnum_list,k),g),
+  q:makelist([E,concat(s,k)],k,len),
+ if listp(g) and length(g)#0 then
+ (org:substpart("%or",g,0),
+  return( ev(qe(q,org),noeval) )) else f)
+else
+ if listp(g) and length(g)#0 then
+  return( substpart("%or",g,0) ) else f
+)$
+
+defrule(ru000, (aa) # (bb), true)$
+defrule(ru001, (aa) > (bb), true)$
+defrule(ru002, (aa) >= (bb), true)$
+defrule(ru003, (aa) < (bb), true)$
+defrule(ru004, (aa) <= (bb), true)$
+defrule(ru006, (aa) = (bb), true)$
+
+nnsolvex0(f):=
+(qe([],applyb1(f,ru006)))%and(nnsolve(
+(applyb2(f,ru000,ru001,ru002,ru003,ru004))
+))$
+
+nnsolvex1(f):=nns(qe([],
+ev(
+(qe([],applyb1(f,ru006)))%and(nnsolve(
+(applyb2(f,ru000,ru001,ru002,ru003,ru004))
+)),eval)
+))$
+
+nnsolvex(f):=
+if nnsqesolve=false then nnsolvex0(f) else nnsolvex1(f)$
+
+nnsolvexx(f):=block([g,gg],
+prt("pre-simplified formula"),g:dnf(qe([],f)),prt(g),
+if atom(g) then return(g)
+else prt("necessary condition"),g:dnf(ncond(g)),prt(length(g)),prt(g),
+ if op(g)="%or" then (prt("simplifing..."),gg:dnf(map(ncond,g)),prt(length(gg)),prt(gg),map(nnsolvex,gg))
+ else nnsolvex(ncond(g))
+)$
+
+/*
+nnsolvexx(x^3+y^3+z^3=3*x*y*z);
+nnsolvexx((a^2+b^2<=2)%and(a*b>=1));
+nnsolvexx((a^2+b^2+c^2<=3)%and(a*b*c>=1));
+*/
+
+/* sqrt to existential, Tarski formulas */
+
+defrule(sqrt2rtk, sqrt(aa), makertk(aa))$
+defrule(sqrt2rtk2, 1/sqrt(aa), 1/makertk(aa))$
+defrule(sqrt2rtk3, abs(aa), makertk(aa^2))$
+defrule(sqrt2rtk4, max2(aa,bb), (aa+bb+makertk((aa-bb)^2))/2)$
+defrule(sqrt2rtk5, min2(aa,bb), (aa+bb-makertk((aa-bb)^2))/2)$
+
+s2e(f):=block([L,makertk,g,q,gg],L:[],
+makertk(x):=block([rtk],rtk:concat(rt,length(L)+1),
+L:append(L,[(rtk^2=x)%and(rtk>=0)]),rtk),
+g:applyb2(f,sqrt2rtk,sqrt2rtk2,sqrt2rtk3,sqrt2rtk4,sqrt2rtk5),
+q:makelist([E,concat(rt,k)],k,length(L)),
+gg:(substpart("%and",L,0))%and(g),
+ev(qe(q,gg),noeval)
+)$ 
+
+s2t(f):=block([L,makertk,g],L:[],
+makertk(x):=block([rtk],rtk:concat(rt,length(L)+1),
+L:append(L,[(rtk^2=x)%and(rtk>=0)]),rtk),
+g:applyb2(f,sqrt2rtk,sqrt2rtk2,sqrt2rtk3,sqrt2rtk4,sqrt2rtk5),
+qe(makelist([E,concat(rt,k)],k,length(L)),(substpart("%and",L,0))%and(g))
+)$ 
+
+/*
+nnsolve(x^2=3*y^2);s2e(%);ev(%);
+qe([[X1,x]],s2t(x+k=sqrt(2-x^2)));nnss(%);
+s2t(max2(a,b)=x);nnss(%);
+s2t(max2(a,max2(b,c))=x);nnss(%);
+s2t(abs(x-a) = abs(x-b)+c);qe([[E,x]],%);qe([],s2t((%) %eq (abs(c)<=abs(a-b))));
+s2t(x=(-b+sqrt(b^2-4*a*c))/(2*a));nnss(%);
+*/
