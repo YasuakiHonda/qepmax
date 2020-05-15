@@ -74,10 +74,13 @@ load(to_poly_solve);
 /* load("qepmax-support.lisp"); */
 
 if (not(member('qepcad_installed_dir,values))) then
-  if status(feature,darwin) then qepcad_installed_dir:sconcat(pathname_directory(load_pathname),"qepcad-mac")
-  elseif status(feature,linux) then qepcad_installed_dir:sconcat(pathname_directory(load_pathname),"qepcad-linux")
-  elseif status(feature,win32) then qepcad_installed_dir:sconcat(pathname_directory(load_pathname),"qepcad-win")
-  else error("Please set variable qepcad_installed_dir to the path of the top of qepcad installed directory.");
+  if status(feature,darwin) then (
+      qepcad_installed_dir:sconcat(pathname_directory(load_pathname),"qepcad-mac"),
+      system(sconcat("chmod 755 ",qepcad_installed_dir,"/bin/qepcad"))
+  ) elseif status(feature,linux) then (
+      qepcad_installed_dir:sconcat(pathname_directory(load_pathname),"qepcad-linux"),
+      system(sconcat("chmod 755 ",qepcad_installed_dir,"/bin/qepcad"))
+  ) else error("Please set variable qepcad_installed_dir to the path of the top of qepcad installed directory.");
 
 if (not(member('qepcad_input_file,values))) then
   qepcad_input_file:sconcat(maxima_tempdir,"/qepcad_input.txt");
