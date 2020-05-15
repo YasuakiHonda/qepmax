@@ -23,5 +23,4 @@
     ((:maxima-file "qepmax") 
      (:maxima-file "nns") 
      (:maxima-file "ratsimpx2")
-     (:maxima-file "toimplx")
      (:file "qepmax-support")))
