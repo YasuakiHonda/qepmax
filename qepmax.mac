@@ -71,7 +71,7 @@ Finally we use Maxima's parse_string() to parse the output expression string.
 */
 
 load(to_poly_solve);
-load("qepmax-support.lisp");
+/* load("qepmax-support.lisp"); */
 
 if (not(member('qepcad_installed_dir,values))) then
   if status(feature,darwin) then qepcad_installed_dir:sconcat(pathname_directory(load_pathname),"qepcad-mac")
@@ -117,8 +117,8 @@ toimplx(x) generates a logical expression only using implx.
 Rational functions appeared in x are treated with care for its
 domain.
 load("toimplx.mac");
-*/
 load("ratsimpx2.mac");
+*/
 load("opsubst");
 
 /*
