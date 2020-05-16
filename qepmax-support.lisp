@@ -137,6 +137,10 @@ first letter:
 	    ((single-char-token c)
 	     (setq *qepcad-prev-token* (string c))
 	     (write-symbol (string (read-char ist nil :eof)) ost))
+	    ((char= c #\Return)
+	     (read-char ist)
+	     ;; read and dispose of it
+	     )
 	    (t (error (format nil "unknown char: ~A~&" c)))))))
 
 (defun write-symbol (str ost)

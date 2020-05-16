@@ -1,6 +1,6 @@
 /*
 Qepmax.mac 
-Copyright (C) 2013, 2014 Yasuaki Honda
+Copyright (C) 2013, 2014, 2017 Yasuaki Honda
 Copyrigth (C) 2013 Reinhard Oldenburg
 Copyright (C) 2014 ehito
 
@@ -71,10 +71,16 @@ Finally we use Maxima's parse_string() to parse the output expression string.
 */
 
 load(to_poly_solve);
-load("qepmax-support.lisp");
+/* load("qepmax-support.lisp"); */
 
 if (not(member('qepcad_installed_dir,values))) then
-  qepcad_installed_dir:"~/qepmax/qesource";
+  if status(feature,darwin) then (
+      qepcad_installed_dir:sconcat(pathname_directory(load_pathname),"qepcad-mac"),
+      system(sconcat("chmod 755 ",qepcad_installed_dir,"/bin/qepcad"))
+  ) elseif status(feature,linux) then (
+      qepcad_installed_dir:sconcat(pathname_directory(load_pathname),"qepcad-linux"),
+      system(sconcat("chmod 755 ",qepcad_installed_dir,"/bin/qepcad"))
+  ) else error("Please set variable qepcad_installed_dir to the path of the top of qepcad installed directory.");
 
 if (not(member('qepcad_input_file,values))) then
   qepcad_input_file:sconcat(maxima_tempdir,"/qepcad_input.txt");
@@ -88,6 +94,21 @@ if (not(member('qepcad_file_pattern,values))) then
 if (not(member('qepcad_option,values))) then
   qepcad_option:" +N20000000 +L10000 ";
 
+if (not(member('qepcad_file_delete_command_string,values))) then
+  if status(feature,win32) then qepcad_file_delete_command_string:sconcat("del ",ssubst("\\","/",qepcad_file_pattern))
+  elseif status(feature,linux) or status(feature,darwin) then qepcad_file_delete_command_string:sconcat("rm -f ",qepcad_file_pattern)
+  else error("Please set variable qepcad_file_delete_command_string to the command to delete qepcad_input.txt and qepcad_output.txt files.");
+
+
+if (not(member('qepcad_qepcad_command_string,values))) then
+  if status(feature,win32) then
+    qepcad_qepcad_command_string:sconcat("set qe=",qepcad_installed_dir,"& %qe%/bin/qepcad.exe ",qepcad_option," < ", qepcad_input_file, " > ", qepcad_output_file, " 2>&1")
+  elseif status(feature,darwin) or status(feature,linux) then
+    qepcad_qepcad_command_string:sconcat("/bin/sh -c 'export qe=",qepcad_installed_dir,"; $qe/bin/qepcad ",qepcad_option," < ", qepcad_input_file, " > ", qepcad_output_file, " 2>&1 '")
+  else error("Please set variable qepcad_qepcad_command_string appropriately.");
+    
+
+
 debug_qepmax:false;
 infix("/=",80,80);
 infix("%implies",60,60);
@@ -99,8 +120,8 @@ toimplx(x) generates a logical expression only using implx.
 Rational functions appeared in x are treated with care for its
 domain.
 load("toimplx.mac");
-*/
 load("ratsimpx2.mac");
+*/
 load("opsubst");
 
 /*
@@ -187,12 +208,9 @@ etfVarOrder(freevarlist, etfvarlist) := block([head,retlist],
 
 
 qepcad(varlist, numfreevar, QFList, formula) := (
-    system(sconcat("rm -f ",qepcad_file_pattern)),
+    system(qepcad_file_delete_command_string),
     qepcad1(varlist, numfreevar, QFList, formula),
-    system(sconcat("bash -c 'export qe=",qepcad_installed_dir,"; $qe/bin/qepcad ",qepcad_option," < ",
-        qepcad_input_file,
-        " &> ",
-        qepcad_output_file, "'")),
+    system(qepcad_qepcad_command_string),
     readQepcad());
     
 qepcad1(varlist, numfreevar, QFList, formula) :=
